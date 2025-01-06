@@ -28,10 +28,13 @@ const askQuestion = (query) =>
   while (isRunning) {
     const command = await askQuestion(`
 Commands:
-  1. navigate [URL]      - Go to a specific URL (e.g., "navigate https://example.com").
-  2. click [CSS_SELECTOR] - Click an element by its CSS selector (e.g., "click a.nextchap").
-  3. screenshot [NAME]    - Take a screenshot and save it with a name (e.g., "screenshot page1.png").
-  4. exit                 - Close the browser and exit the app.
+  1. navigate [URL]        - Go to a specific URL (e.g., "navigate https://example.com").
+  2. click [CSS_SELECTOR]   - Click an element by its CSS selector (e.g., "click a.nextchap").
+  3. screenshot [NAME]      - Take a screenshot and save it with a name (e.g., "screenshot page1.png").
+  4. pageup                 - Scroll the page up by one full page.
+  5. pagedown               - Scroll the page down by one full page.
+  6. move [+-<px>]          - Scroll the page by a specific number of pixels (e.g., "move +200" or "move -200").
+  7. exit                   - Close the browser and exit the app.
 Your command: `);
 
     // Split command into parts
@@ -68,6 +71,34 @@ Your command: `);
           console.log(`Taking a screenshot: ${fileName}`);
           await page.screenshot({ path: fileName });
           console.log(`Screenshot saved as ${fileName}`);
+          break;
+        }
+
+        case "pageup": {
+          console.log("Scrolling page up by one full page.");
+          await page.keyboard.press("PageUp");
+          console.log("Page scrolled up.");
+          break;
+        }
+
+        case "pagedown": {
+          console.log("Scrolling page down by one full page.");
+          await page.keyboard.press("PageDown");
+          console.log("Page scrolled down.");
+          break;
+        }
+
+        case "move": {
+          const px = parseInt(args.join(" "), 10);
+          if (isNaN(px)) {
+            console.log("Error: Please provide a valid number of pixels.");
+          } else {
+            console.log(`Scrolling by ${px} pixels.`);
+            await page.evaluate((px) => {
+              window.scrollBy(0, px);
+            }, px);
+            console.log(`Page scrolled by ${px} pixels.`);
+          }
           break;
         }
 

@@ -1,7 +1,12 @@
 const puppeteer = require("puppeteer");
 const readline = require("readline");
+const path = require("path");
+require("dotenv").config();
 
-// Create a readline interface for terminal input
+//console.log(process.env);
+const Profile = path.resolve(process.env.FIREFOX_PATH_LOCAL);
+console.log("Loading Profile from:", Profile);
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -12,10 +17,22 @@ const askQuestion = (query) =>
   new Promise((resolve) => rl.question(query, resolve));
 
 (async () => {
-  // Launch the browser
+  // Launch the browser with Firefox
   const browser = await puppeteer.launch({
-    headless: true, // No GUI mode
-    args: ["--no-sandbox", "--disable-setuid-sandbox"], // For Raspberry Pi compatibility
+    product: "firefox", // Use Firefox
+    browser: "firefox", // Use Firefox
+    headless: true, // Disable headless mode for GUI
+    userDataDir: Profile,
+
+    // executablePath: "/usr/bin/firefox", // Adjust the path to your Firefox binary
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      // `--load-extension=${extensionPath}`,
+      // `--disable-extensions-except=${extensionPath}`,
+      `-P "${Profile}"`, // Path to the preconfigured Firefox profile
+    ], // For compatibility
   });
 
   const page = await browser.newPage();

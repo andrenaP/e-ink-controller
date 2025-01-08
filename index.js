@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 const readline = require("readline");
 const path = require("path");
+const { spawn } = require("child_process");
 require("dotenv").config();
 
 //console.log(process.env);
@@ -40,22 +41,27 @@ const askQuestion = (query) =>
 
   console.log("Browser launched. Enter commands to control it.");
 
-  // Main interaction loop
-  let isRunning = true;
-  while (isRunning) {
-    const command = await askQuestion(`
+  console.log(`
 Commands:
-  1. navigate [URL]        - Go to a specific URL (e.g., "navigate https://example.com").
+  1. navigate [URL]         - Go to a specific URL (e.g., "navigate https://example.com").
   2. click [CSS_SELECTOR]   - Click an element by its CSS selector (e.g., "click a.nextchap").
   3. screenshot [NAME]      - Take a screenshot and save it with a name (e.g., "screenshot page1.png").
+  4. display [NAME]         - Display a screenshot using timg (made for kitty but will work anywhere).
   4. pageup                 - Scroll the page up by one full page.
   5. pagedown               - Scroll the page down by one full page.
   6. move [+-<px>]          - Scroll the page by a specific number of pixels (e.g., "move +200" or "move -200").
   7. exit                   - Close the browser and exit the app.
+    `);
+
+  // Main interaction loop
+  let isRunning = true;
+  while (isRunning) {
+    const command = await askQuestion(`
 Your command: `);
 
     // Split command into parts
     const [action, ...args] = command.split(" ");
+    var lasttakenscreenshot = "";
 
     try {
       switch (action) {
@@ -85,9 +91,32 @@ Your command: `);
 
         case "screenshot": {
           const fileName = args.join(" ") || "screenshot.png";
-          console.log(`Taking a screenshot: ${fileName}`);
+          // console.log(`Taking a screenshot: ${fileName}`);
           await page.screenshot({ path: fileName });
           console.log(`Screenshot saved as ${fileName}`);
+          lasttakenscreenshot = fileName;
+          break;
+        }
+        case "display": {
+          const imagepath = args.join(" ") || "screenshot.png";
+          if (!imagepath) imagepath = lasttakenscreenshot;
+
+          const timg = spawn("sh", ["-c", `timg ${imagepath}`], {
+            stdio: "inherit",
+          });
+
+          timg.on("error", (err) => {
+            console.error("Failed to start timg:", err);
+          });
+
+          timg.on("close", (code) => {
+            if (code === 0) {
+              console.log("Image displayed successfully.");
+            } else {
+              console.error(`timg process exited with code ${code}`);
+            }
+          });
+
           break;
         }
 

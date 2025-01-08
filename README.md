@@ -6,14 +6,13 @@ This project allows you to take screenshots of websites and display them on an E
 
 - Capture screenshots of websites using Puppeteer.
 - Navigate, click, and interact with web pages before capturing screenshots.
-- Display the screenshots on an E-Ink display.
+- Display the screenshots.
 
 ## Prerequisites
 
-- **Node.js** (version 16 or later)
-- **Puppeteer** (with Firefox support)
+- **Node.js** (version 18 or later)
 - **Firefox** (installed on your system)
-- **E-Ink display** hardware (connected and configured)
+- **timg** (installed on your system)
 
 ## Setup
 
